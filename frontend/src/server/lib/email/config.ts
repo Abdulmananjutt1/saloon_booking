@@ -1,0 +1,5 @@
+import { ADMIN_EMAIL, APP_URL, EMAIL_FROM, RESEND_API_KEY } from "../config";
+
+export { ADMIN_EMAIL, APP_URL, EMAIL_FROM, RESEND_API_KEY };
+
+export const EMAIL_ENABLED = Boolean(RESEND_API_KEY);
