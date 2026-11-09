@@ -2,7 +2,6 @@
 //  Web Push Service — Glamour Studio
 // ─────────────────────────────────────────────────────────
 
-import webpush from "web-push";
 import prisma from "../db";
 
 export interface PushPayload {
@@ -15,25 +14,21 @@ export interface PushPayload {
   data?:   Record<string, unknown>;
 }
 
-// Lazy init — only called at runtime, never at build time
-let initialized = false;
-function initVapid() {
-  if (initialized) return;
-  const pub   = process.env.VAPID_PUBLIC_KEY  ?? "";
-  const priv  = process.env.VAPID_PRIVATE_KEY ?? "";
-  const email = process.env.VAPID_EMAIL       ?? "mailto:admin@glamourstudio.com";
-  if (pub && priv) {
-    webpush.setVapidDetails(email, pub, priv);
-    initialized = true;
-  }
-}
-
 async function sendToSubscription(
   sub: { endpoint: string; p256dh: string; auth: string },
   payload: PushPayload,
 ): Promise<boolean> {
   try {
-    initVapid();
+    const pub   = process.env.VAPID_PUBLIC_KEY  ?? "";
+    const priv  = process.env.VAPID_PRIVATE_KEY ?? "";
+    const email = process.env.VAPID_EMAIL       ?? "mailto:admin@glamourstudio.com";
+
+    if (!pub || !priv) return false;
+
+    // Dynamic import — web-push is never loaded at build time
+    const webpush = (await import("web-push")).default;
+    webpush.setVapidDetails(email, pub, priv);
+
     await webpush.sendNotification(
       { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
       JSON.stringify(payload),
