@@ -3,13 +3,7 @@
 // ─────────────────────────────────────────────────────────
 
 import webpush from "web-push";
-import { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL } from "./config";
 import prisma from "../db";
-
-// Configure VAPID details once
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-}
 
 export interface PushPayload {
   title:   string;
@@ -21,11 +15,25 @@ export interface PushPayload {
   data?:   Record<string, unknown>;
 }
 
+// Lazy init — only called at runtime, never at build time
+let initialized = false;
+function initVapid() {
+  if (initialized) return;
+  const pub   = process.env.VAPID_PUBLIC_KEY  ?? "";
+  const priv  = process.env.VAPID_PRIVATE_KEY ?? "";
+  const email = process.env.VAPID_EMAIL       ?? "mailto:admin@glamourstudio.com";
+  if (pub && priv) {
+    webpush.setVapidDetails(email, pub, priv);
+    initialized = true;
+  }
+}
+
 async function sendToSubscription(
   sub: { endpoint: string; p256dh: string; auth: string },
   payload: PushPayload,
 ): Promise<boolean> {
   try {
+    initVapid();
     await webpush.sendNotification(
       { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
       JSON.stringify(payload),
