@@ -91,6 +91,12 @@ export default async function ServiceDetailPage({ params }: Props) {
             color: var(--text-primary);
           }
 
+          .service-detail-page .sal-container {
+            max-width: 1440px;
+            padding-left: 40px;
+            padding-right: 40px;
+          }
+
           .service-detail-hero {
             position: relative;
             height: 540px;
@@ -798,6 +804,10 @@ export default async function ServiceDetailPage({ params }: Props) {
             .service-related-grid {
               grid-template-columns: 1fr;
             }
+
+            .service-content-stack > div[style*="grid-template-columns"] {
+              grid-template-columns: 1fr !important;
+            }
           }
 
           @media (max-width: 520px) {
@@ -930,6 +940,146 @@ export default async function ServiceDetailPage({ params }: Props) {
                   </div>
                 </article>
 
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "28px" }}>
+                  <article className="service-panel">
+                    <div className="service-panel-header">
+                      <h2 className="service-panel-title">
+                        Service <span className="text-gold">Process</span>
+                      </h2>
+                    </div>
+                    <div className="service-included-grid" style={{ gridTemplateColumns: "1fr" }}>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <UserCheck size={19} />
+                        </span>
+                        <div>
+                          <h3>Step 1: Consultation</h3>
+                          <p>Discuss your preferences and desired look with our expert.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Scissors size={19} />
+                        </span>
+                        <div>
+                          <h3>Step 2: Preparation</h3>
+                          <p>We prepare your hair and skin with premium products.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Wand2 size={19} />
+                        </span>
+                        <div>
+                          <h3>Step 3: Service</h3>
+                          <p>Expert application and styling with attention to detail.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Sparkles size={19} />
+                        </span>
+                        <div>
+                          <h3>Step 4: Finishing</h3>
+                          <p>Final touches and styling to perfect your look.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article className="service-panel">
+                    <div className="service-panel-header">
+                      <h2 className="service-panel-title">
+                        Aftercare <span className="text-gold">Tips</span>
+                      </h2>
+                    </div>
+                    <div className="service-included-grid" style={{ gridTemplateColumns: "1fr" }}>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <ShieldCheck size={19} />
+                        </span>
+                        <div>
+                          <h3>Use Quality Products</h3>
+                          <p>Stick to salon-recommended products for best results.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Clock size={19} />
+                        </span>
+                        <div>
+                          <h3>Regular Maintenance</h3>
+                          <p>Schedule touch-ups to keep your look fresh and vibrant.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Coffee size={19} />
+                        </span>
+                        <div>
+                          <h3>Gentle Care</h3>
+                          <p>Avoid harsh treatments immediately after your service.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Gem size={19} />
+                        </span>
+                        <div>
+                          <h3>Professional Advice</h3>
+                          <p>Contact us anytime for personalized care guidance.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article className="service-panel">
+                    <div className="service-panel-header">
+                      <h2 className="service-panel-title">
+                        Why <span className="text-gold">Choose Us</span>
+                      </h2>
+                    </div>
+                    <div className="service-included-grid" style={{ gridTemplateColumns: "1fr" }}>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Star size={19} />
+                        </span>
+                        <div>
+                          <h3>Expert Stylists</h3>
+                          <p>Certified professionals with years of experience.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Gem size={19} />
+                        </span>
+                        <div>
+                          <h3>Premium Products</h3>
+                          <p>Only the finest Loreal, Wella & Kerastase products.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <BadgeCheck size={19} />
+                        </span>
+                        <div>
+                          <h3>Satisfaction Guarantee</h3>
+                          <p>We ensure you leave happy with the results.</p>
+                        </div>
+                      </div>
+                      <div className="service-feature-item">
+                        <span className="service-feature-icon">
+                          <Users size={19} />
+                        </span>
+                        <div>
+                          <h3>Trusted by 1000+</h3>
+                          <p>Join our satisfied clients across Islamabad.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+
                 <article className="service-panel">
                   <div className="service-panel-header">
                     <h2 className="service-panel-title">
@@ -1040,43 +1190,6 @@ export default async function ServiceDetailPage({ params }: Props) {
                   </div>
                 </div>
               </aside>
-            </div>
-          </div>
-        </section>
-
-        <section className="service-final-cta">
-          <div className="sal-container">
-            <div className="service-final-cta-inner">
-              <h2 className="sal-h2">
-                Ready to book <span className="text-gold">{service.name}</span>?
-              </h2>
-              <p>Choose your time online or call the studio for quick help with this service.</p>
-
-              <div className="service-final-actions">
-                <Link href={`${ROUTES.BOOK}?service=${service.id}`} className="sal-btn sal-btn-gold">
-                  <CalendarDays size={17} />
-                  Book Now
-                </Link>
-                <Link href={`tel:${APP_PHONE}`} className="sal-btn sal-btn-outline">
-                  <Phone size={17} />
-                  Call to Book
-                </Link>
-              </div>
-
-              <div className="service-cta-stats">
-                <div>
-                  <strong>24/7</strong>
-                  <span>Online booking</span>
-                </div>
-                <div>
-                  <strong>100%</strong>
-                  <span>Service care</span>
-                </div>
-                <div>
-                  <strong>15+</strong>
-                  <span>Expert stylists</span>
-                </div>
-              </div>
             </div>
           </div>
         </section>

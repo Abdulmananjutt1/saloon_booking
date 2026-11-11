@@ -38,6 +38,7 @@ export const ROUTES = {
   STYLISTS: "/stylists",
   GALLERY: "/gallery",
   ABOUT: "/about",
+  BLOGS: "/blogs",
   CONTACT: "/contact",
   MY_BOOKINGS: "/dashboard?tab=appointments",
   DASHBOARD: "/dashboard",

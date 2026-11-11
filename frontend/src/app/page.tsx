@@ -32,9 +32,13 @@ export default function HomePage() {
         <LuxuryBrandsSection />
         <PricingSection />
         <GalleryPreviewSection />
-        <ExperienceVideoSection />
+        <div id="story">
+          <ExperienceVideoSection />
+        </div>
         <TeamSection stylists={featuredStylists} />
-        <TestimonialsSection reviews={REVIEWS} animated />
+        <div id="reviews">
+          <TestimonialsSection reviews={REVIEWS} animated />
+        </div>
         <CtaBanner />
       </main>
       <Footer />

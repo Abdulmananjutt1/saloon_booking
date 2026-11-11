@@ -1,289 +1,209 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { APP_NAME, NAV_LINKS, ROUTES, APP_PHONE } from "@/constants";
-import { Menu, X, Phone, Sun, Moon } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { APP_NAME, NAV_LINKS, ROUTES, SERVICE_CATEGORIES } from "@/constants";
+import { Calendar, ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { getSession } from "@/lib/session";
 
+function LotusMark() {
+  return (
+    <svg className="lux-nav-lotus" viewBox="0 0 48 48" fill="none" aria-hidden>
+      <path
+        d="M24 8c1.2 4.6 2 8.4 2 12.2 0 3.2-.6 6.2-2 9.8-1.4-3.6-2-6.6-2-9.8C22 16.4 22.8 12.6 24 8Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <path
+        d="M24 12c3.4 3.2 6.8 5 10.2 5.6-3.2 2.4-6.6 4.2-10.2 6.2-3.6-2-7-3.8-10.2-6.2C17.2 17 20.6 15.2 24 12Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <path
+        d="M16 18c2.8 4.4 4.8 8 5.8 12.4C18 28.6 14.4 26 11 22.2 13 20.6 14.6 19.2 16 18Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <path
+        d="M32 18c-2.8 4.4-4.8 8-5.8 12.4C30 28.6 33.6 26 37 22.2 35 20.6 33.4 19.2 32 18Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <path
+        d="M12 24c3.8 3.2 7.6 5.2 12 7.6 4.4-2.4 8.2-4.4 12-7.6"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <path d="M24 32c0 2.4.2 4.6 1.4 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M24 32c0 2.4-.2 4.6-1.4 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M20 34c-2.2 2.6-4.4 4.4-7 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M28 34c2.2 2.6 4.4 4.4 7 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<{ role: string; name: string } | null>(null);
   const { theme, toggle } = useTheme();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 40);
+    const fn = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", fn, { passive: true });
-
-    // Check if user is logged in
     try {
       const u = getSession();
       if (u) {
         const id = requestAnimationFrame(() => setUser(u));
-        window.addEventListener("scroll", fn, { passive: true });
         return () => {
           window.removeEventListener("scroll", fn);
           cancelAnimationFrame(id);
         };
       }
-    } catch { /* ignore */ }
-
+    } catch {
+      /* ignore */
+    }
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
+  useEffect(() => {
+    setOpen(false);
+    setServicesOpen(false);
+  }, [pathname]);
+
   const dashboardUrl = user?.role === "ADMIN" || user?.role === "admin" ? ROUTES.ADMIN : ROUTES.DASHBOARD;
+  const links = [
+    { label: "Home", href: ROUTES.HOME },
+    { label: "Services", href: ROUTES.SERVICES, dropdown: true },
+    { label: "About", href: ROUTES.ABOUT },
+    { label: "Gallery", href: ROUTES.GALLERY },
+    { label: "Blogs", href: ROUTES.BLOGS },
+    { label: "Contact", href: ROUTES.CONTACT },
+  ];
 
   return (
     <>
-      {/* Floating Theme Toggle */}
       <button
         onClick={toggle}
         aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         title={theme === "dark" ? "Light mode" : "Dark mode"}
-        style={{
-          position: "fixed",
-          right: "24px",
-          bottom: "24px",
-          zIndex: 100,
-          width: "52px",
-          height: "52px",
-          borderRadius: "50%",
-          border: "1px solid var(--border-light)",
-          background: theme === "dark" ? "rgba(13,12,10,0.95)" : "rgba(253,248,242,0.95)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.2), 0 4px 16px rgba(201,151,59,0.15)",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "all 0.3s ease",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.transform = "scale(1.1)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.3), 0 6px 20px rgba(201,151,59,0.25)";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.transform = "scale(1)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px rgba(0,0,0,0.2), 0 4px 16px rgba(201,151,59,0.15)";
-        }}
+        className="lux-theme-fab"
       >
-        {theme === "dark"
-          ? <Sun style={{ width: "22px", height: "22px", color: "var(--gold)" }} />
-          : <Moon style={{ width: "22px", height: "22px", color: "var(--gold)" }} />
-        }
+        {theme === "dark" ? (
+          <Sun style={{ width: 22, height: 22, color: "var(--gold)" }} />
+        ) : (
+          <Moon style={{ width: 22, height: 22, color: "var(--gold)" }} />
+        )}
       </button>
 
-      {/* Responsive styles for floating theme toggle */}
-      <style>{`
-        @media (max-width: 768px) {
-          button[aria-label*="Switch to"] {
-            width: 44px !important;
-            height: 44px !important;
-            right: 16px !important;
-            bottom: 16px !important;
-          }
-          button[aria-label*="Switch to"] svg {
-            width: 18px !important;
-            height: 18px !important;
-          }
-        }
-      `}</style>
-
-      {/* Main Navbar */}
-      <header style={{
-        position: "fixed", inset: "0 0 auto 0", zIndex: 50,
-        width: "100%", maxWidth: "100%",
-        transition: "all 0.4s ease",
-        background: scrolled
-          ? (theme === "dark" ? "rgba(13,12,10,0.95)" : "rgba(253,248,242,0.95)")
-          : "transparent",
-        backdropFilter: scrolled ? "blur(24px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(24px)" : "none",
-        borderBottom: scrolled ? "1px solid var(--border-light)" : "none",
-        boxShadow: scrolled
-          ? (theme === "dark" ? "0 4px 30px rgba(0,0,0,0.5)" : "0 4px 30px rgba(0,0,0,0.08)")
-          : "none",
-      }}>
-      <div className="sal-container">
-        <div className="navbar-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 80 }}>
-
-          {/* ── Logo ── */}
-          <Link href={ROUTES.HOME} style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none" }}>
-            <Logo size={60} />
-            <div className="navbar-logo-text">
-              <p style={{
-                fontSize: "1.1rem", fontWeight: 900, letterSpacing: "-0.02em",
-                background: "var(--grad-gold)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                backgroundClip: "text"
-              }}>
-                {APP_NAME}
-              </p>
-              <p style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.3em", color: !scrolled ? "#6e6456" : "var(--text-muted)", marginTop: -2 }}>
-                Salon &amp; Spa
-              </p>
-            </div>
+      <header className={`lux-nav ${scrolled ? "is-scrolled" : ""}`}>
+        <div className="sal-container lux-nav-inner">
+          <Link href={ROUTES.HOME} className="lux-brand">
+            <LotusMark />
+            <span>
+              <span className="lux-brand-name">{APP_NAME}</span>
+              <span className="lux-brand-sub">Beauty Salon</span>
+            </span>
           </Link>
 
-          {/* ── Desktop Nav ── */}
-          <nav style={{ display: "none", alignItems: "center", gap: 4 }} className="lg-nav">
-            {NAV_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                style={{
-                  padding: "8px 16px", fontSize: "0.82rem", fontWeight: 500,
-                  color: !scrolled ? "#b8a98a" : "var(--text-secondary)", textDecoration: "none",
-                  borderRadius: 8, transition: "all 0.2s ease",
-                  textTransform: "uppercase", letterSpacing: "0.08em"
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "#e0b96a";
-                  (e.currentTarget as HTMLElement).style.background = "rgba(201,151,59,0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = !scrolled ? "#b8a98a" : "var(--text-secondary)";
-                  (e.currentTarget as HTMLElement).style.background = "transparent";
-                }}
-              >
-                {l.label}
-              </Link>
-            ))}
+          <nav className="lux-nav-links" aria-label="Primary">
+            {links.map((l) =>
+              l.dropdown ? (
+                <div key={l.label} className="lux-nav-drop">
+                  <Link
+                    href={l.href}
+                    className={`lux-nav-link ${pathname.startsWith(ROUTES.SERVICES) ? "is-active" : ""}`}
+                  >
+                    {l.label}
+                    <ChevronDown style={{ width: 13, height: 13 }} />
+                  </Link>
+                  <div className="lux-nav-menu">
+                    {SERVICE_CATEGORIES.map((c) => (
+                      <Link key={c.value} href={`${ROUTES.SERVICES}?cat=${c.value}`}>
+                        {c.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={l.label}
+                  href={l.href}
+                  className={`lux-nav-link ${pathname === l.href ? "is-active" : ""}`}
+                >
+                  {l.label}
+                </Link>
+              )
+            )}
           </nav>
 
-          {/* ── CTA area ── */}
-          <div style={{ display: "none", alignItems: "center", gap: 16 }} className="lg-cta">
-            <a href={`tel:${APP_PHONE}`} style={{
-              display: "flex", alignItems: "center", gap: 6,
-              fontSize: "0.75rem", color: !scrolled ? "#c4b49a" : "var(--text-secondary)", textDecoration: "none",
-              transition: "color 0.2s"
-            }}
-            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "#e0b96a"}
-            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = !scrolled ? "#c4b49a" : "var(--text-secondary)"}
-            >
-              <Phone style={{ width: 13, height: 13 }} /> {APP_PHONE}
-            </a>
-            <div style={{ width: 1, height: 18, background: "var(--border-light)" }} />
+          <div className="lux-nav-cta">
             {user ? (
-              <Link href={dashboardUrl} className="sal-btn sal-btn-outline" style={{ padding: "9px 20px", fontSize: "0.78rem" }}>
+              <Link href={dashboardUrl} className="lux-nav-ghost">
                 Dashboard
               </Link>
-            ) : (
-              <Link href={ROUTES.LOGIN} style={{
-                fontSize: "0.8rem", fontWeight: 500,
-                color: !scrolled ? "#b8a98a" : "var(--text-secondary)",
-                padding: "8px 14px", borderRadius: 8, textDecoration: "none",
-                transition: "all 0.2s"
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "#f5f0e8";
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = !scrolled ? "#b8a98a" : "var(--text-secondary)";
-                (e.currentTarget as HTMLElement).style.background = "transparent";
-              }}
-              >
-                Sign In
-              </Link>
-            )}
-            <Link href={ROUTES.BOOK} className="sal-btn sal-btn-gold" style={{ padding: "10px 22px", fontSize: "0.78rem" }}>
-              Book Now
+            ) : null}
+            <Link href={ROUTES.BOOK} className="lux-btn-dark lux-nav-book">
+              <Calendar style={{ width: 15, height: 15 }} />
+              Book Appointment
             </Link>
           </div>
 
-          {/* ── Mobile toggle only ── */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setOpen(!open)}
-              aria-label="Toggle menu"
-              style={{
-                padding: "8px", borderRadius: 8, border: "1px solid var(--border-light)",
-                background: "transparent", cursor: "pointer",
-                color: "var(--text-secondary)", transition: "all 0.2s"
-              }}
-              className="mobile-toggle"
-            >
-              {open ? <X style={{ width: 20, height: 20 }} /> : <Menu style={{ width: 20, height: 20 }} />}
-            </button>
-          </div>
+          <button
+            className="lux-nav-burger"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            {open ? <X style={{ width: 20, height: 20 }} /> : <Menu style={{ width: 20, height: 20 }} />}
+          </button>
         </div>
 
-        {/* ── Mobile Menu ── */}
         {open && (
-          <div style={{
-            borderTop: "1px solid var(--border-light)",
-            paddingBlock: 16,
-            background: theme === "dark" ? "rgba(13,12,10,0.98)" : "rgba(253,248,242,0.98)",
-            backdropFilter: "blur(24px)"
-          }}>
+          <div className="lux-nav-mobile">
             {NAV_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                style={{
-                  display: "block", padding: "11px 16px",
-                  fontSize: "0.85rem", fontWeight: 500,
-                  color: "var(--text-secondary)", textDecoration: "none",
-                  borderRadius: 8, marginBottom: 2,
-                  textTransform: "uppercase", letterSpacing: "0.08em",
-                  transition: "all 0.2s"
-                }}
-              >
+              <Link key={l.href} href={l.href} onClick={() => setOpen(false)}>
                 {l.label}
               </Link>
             ))}
-            <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-light)", marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
-              {user ? (
+            <button
+              className="lux-nav-mobile-toggle"
+              onClick={() => setServicesOpen((v) => !v)}
+            >
+              All Services
+              <ChevronDown style={{ width: 14, height: 14, transform: servicesOpen ? "rotate(180deg)" : undefined }} />
+            </button>
+            {servicesOpen &&
+              SERVICE_CATEGORIES.map((c) => (
                 <Link
-                  href={dashboardUrl}
+                  key={c.value}
+                  href={`${ROUTES.SERVICES}?cat=${c.value}`}
                   onClick={() => setOpen(false)}
-                  className="sal-btn sal-btn-outline"
-                  style={{ width: "100%", justifyContent: "center", padding: "11px" }}
+                  className="lux-nav-mobile-sub"
                 >
-                  Go to Dashboard
+                  {c.label}
                 </Link>
-              ) : (
-                <Link
-                  href={ROUTES.LOGIN}
-                  onClick={() => setOpen(false)}
-                  className="sal-btn sal-btn-ghost"
-                  style={{ width: "100%", justifyContent: "center", padding: "11px" }}
-                >
-                  Sign In
-                </Link>
-              )}
-              <Link
-                href={ROUTES.BOOK}
-                onClick={() => setOpen(false)}
-                className="sal-btn sal-btn-gold"
-                style={{ width: "100%", justifyContent: "center", padding: "12px" }}
-              >
-                Book Appointment
+              ))}
+            <Link href="/#reviews" onClick={() => setOpen(false)}>
+              Reviews
+            </Link>
+            {user ? (
+              <Link href={dashboardUrl} onClick={() => setOpen(false)}>
+                Dashboard
               </Link>
-            </div>
+            ) : (
+              <Link href={ROUTES.LOGIN} onClick={() => setOpen(false)}>
+                Sign In
+              </Link>
+            )}
+            <Link href={ROUTES.BOOK} onClick={() => setOpen(false)} className="lux-btn-dark lux-nav-mobile-book">
+              Book Appointment
+            </Link>
           </div>
         )}
-      </div>
-
-      {/* Inline responsive styles */}
-      <style>{`
-        @media (min-width: 1024px) {
-          .lg-nav { display: flex !important; }
-          .lg-cta { display: flex !important; }
-          .mobile-toggle { display: none !important; }
-        }
-        @media (max-width: 640px) {
-          .navbar-logo-text { display: none !important; }
-          .navbar-inner { height: 64px !important; }
-        }
-      `}</style>
       </header>
     </>
   );

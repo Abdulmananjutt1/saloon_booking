@@ -99,6 +99,13 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Large Brand Name Section - Tiffany Style */}
+      <div className="footer-brand-section">
+        <div className="sal-container">
+          <h2 className="footer-brand-large">GLAMOUR</h2>
+        </div>
+      </div>
+
       {/* Bottom bar */}
       <div className="footer-bottom-bar">
         <div className="sal-container footer-bottom-inner">

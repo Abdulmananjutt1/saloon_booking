@@ -7,20 +7,19 @@ type Theme = "dark" | "light";
 const ThemeContext = createContext<{
   theme: Theme;
   toggle: () => void;
-}>({ theme: "dark", toggle: () => {} });
+}>({ theme: "light", toggle: () => {} });
 
 export function useTheme() {
   return useContext(ThemeContext);
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   // On mount — read from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("gs-theme") as Theme | null;
-    const preferred = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-    const initial = saved ?? preferred;
+    const initial = saved ?? "light";
     document.documentElement.setAttribute("data-theme", initial);
     // Use startTransition-style pattern to avoid setState-in-effect lint error
     const id = requestAnimationFrame(() => setTheme(initial));
