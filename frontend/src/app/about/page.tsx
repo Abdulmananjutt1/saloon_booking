@@ -126,10 +126,19 @@ export default function AboutPage() {
     setMounted(true);
     fetchStylists().then((data) => {
       if (data.length > 0) {
-        // Transform ApiStylist to Stylist by adding missing slots property
+        // Transform ApiStylist to Stylist format
         const transformedStylists: Stylist[] = data.map(stylist => ({
-          ...stylist,
-          slots: [] // Default empty slots for API stylists
+          id: stylist.id,
+          name: stylist.name,
+          role: stylist.role,
+          avatar: stylist.avatar,
+          rating: stylist.rating,
+          reviewCount: stylist.reviewCount,
+          experience: stylist.experience,
+          specialties: stylist.specialties.map(s => s.name),
+          bio: stylist.bio,
+          available: stylist.available,
+          slots: []
         }));
         setApiStylists(transformedStylists);
       }
@@ -654,21 +663,35 @@ export default function AboutPage() {
               {featuredStylists.map((stylist) => (
                 <div key={stylist.id} className="sal-card" style={{ padding: 0, overflow: "hidden" }}>
                   <div style={{ position: "relative", height: 320, background: "var(--bg-secondary)" }}>
-                    {stylist.image && (
-                      <img
-                        src={stylist.image}
-                        alt={stylist.name}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    )}
+                    <img
+                      src={stylist.avatar}
+                      alt={stylist.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
                   </div>
                   <div style={{ padding: 20 }}>
                     <h3 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: 4, color: "var(--text-primary)" }}>
                       {stylist.name}
                     </h3>
                     <p style={{ fontSize: "0.85rem", color: "var(--gold)", marginBottom: 8 }}>
-                      {stylist.specialty}
+                      {stylist.role}
                     </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                      {stylist.specialties.map((specialty, idx) => (
+                        <span 
+                          key={idx}
+                          style={{ 
+                            fontSize: "0.75rem", 
+                            padding: "4px 8px", 
+                            background: "rgba(201,151,59,0.1)", 
+                            color: "var(--gold)",
+                            borderRadius: 4
+                          }}
+                        >
+                          {specialty}
+                        </span>
+                      ))}
+                    </div>
                     <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.6 }}>
                       {stylist.bio}
                     </p>
@@ -706,11 +729,11 @@ export default function AboutPage() {
                     ))}
                   </div>
                   <p style={{ fontSize: "0.95rem", color: "var(--text-secondary)", lineHeight: 1.7, marginBottom: 16 }}>
-                    "{review.text}"
+                    "{review.comment}"
                   </p>
                   <div>
                     <p style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--text-primary)" }}>
-                      {review.name}
+                      {review.customerName}
                     </p>
                     <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
                       {review.service}
