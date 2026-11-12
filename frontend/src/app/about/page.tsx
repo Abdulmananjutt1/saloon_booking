@@ -15,6 +15,7 @@ import Footer from "@/components/layout/Footer";
 import { ROUTES, STATS, APP_PHONE, APP_EMAIL, APP_ADDRESS } from "@/constants";
 import { REVIEWS, STYLISTS } from "@/lib/data/salon";
 import { fetchStylists } from "@/lib/api/stylists";
+import type { Stylist } from "@/types";
 
 // export const metadata: Metadata = {
 //   title: "About Us — Glamour Studio | Islamabad's Premier Salon",
@@ -124,7 +125,14 @@ export default function AboutPage() {
   useEffect(() => {
     setMounted(true);
     fetchStylists().then((data) => {
-      if (data.length > 0) setApiStylists(data);
+      if (data.length > 0) {
+        // Transform ApiStylist to Stylist by adding missing slots property
+        const transformedStylists: Stylist[] = data.map(stylist => ({
+          ...stylist,
+          slots: [] // Default empty slots for API stylists
+        }));
+        setApiStylists(transformedStylists);
+      }
     });
   }, []);
 

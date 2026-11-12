@@ -54,7 +54,7 @@ export default function ContactPage() {
         </PageHero>
 
         <section style={{ background: "var(--bg-secondary)", padding: "100px 0" }}>
-          <div className="sal-container">
+          <div className="sal-container" style={{ maxWidth: 1440, paddingLeft: 40, paddingRight: 40 }}>
             <div className="sal-grid-2col" style={{ gap: 40 }}>
               <div className="sal-glass" style={{ padding: 40, borderRadius: 20 }}>
                 <ContactForm />
@@ -77,7 +77,7 @@ export default function ContactPage() {
         </section>
 
         <section style={{ background: "var(--bg-primary)", padding: "100px 0" }}>
-          <div className="sal-container">
+          <div className="sal-container" style={{ maxWidth: 1440, paddingLeft: 40, paddingRight: 40 }}>
             <SectionHeader
               eyebrow="Common Questions"
               title={
