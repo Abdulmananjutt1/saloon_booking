@@ -8,7 +8,7 @@ export interface SessionUser {
   name: string;
   email: string;
   phone: string;
-  role: "ADMIN" | "CLIENT" | "admin" | "client";
+  role: "SUPER_ADMIN" | "ADMIN" | "DESK_ADMIN" | "OPERATIONAL_ADMIN" | "STYLIST_MANAGER" | "CLIENT" | "admin" | "client";
 }
 
 export function saveSession(user: SessionUser, token: string): void {
@@ -34,8 +34,31 @@ export function clearSession(): void {
   localStorage.removeItem("token");
 }
 
+/**
+ * Check if user has any admin role
+ */
 export function isAdmin(user: SessionUser | null): boolean {
-  return user?.role === "ADMIN" || user?.role === "admin";
+  if (!user) return false;
+  const role = user.role.toUpperCase();
+  return role === "SUPER_ADMIN" || 
+         role === "ADMIN" || 
+         role === "DESK_ADMIN" || 
+         role === "OPERATIONAL_ADMIN" || 
+         role === "STYLIST_MANAGER";
+}
+
+/**
+ * Check if role string is an admin role (works with string input)
+ */
+export function isAdminRole(role: string | undefined | null): boolean {
+  if (!role) return false;
+  const roleUpper = role.toUpperCase();
+  return roleUpper === "SUPER_ADMIN" || 
+         roleUpper === "ADMIN" || 
+         roleUpper === "DESK_ADMIN" || 
+         roleUpper === "OPERATIONAL_ADMIN" || 
+         roleUpper === "STYLIST_MANAGER" ||
+         role === "admin"; // for backward compatibility
 }
 
 /** Read a one-time toast from sessionStorage (set before redirect) */

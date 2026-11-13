@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { API_BASE_URL } from "@/lib/config";
-import { getSession } from "@/lib/session";
+import { getSession, isAdminRole } from "@/lib/session";
 
 const VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
 
@@ -84,7 +84,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
       // Determine role + email from session
       const session = getSession();
-      const role    = session?.role === "ADMIN" || session?.role === "admin" ? "admin" : "client";
+      const role = isAdminRole(session?.role) ? "admin" : "client";
       const email   = session?.email ?? null;
       const userId  = session?.id ?? null;
 

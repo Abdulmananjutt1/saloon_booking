@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { APP_NAME, NAV_LINKS, ROUTES, SERVICE_CATEGORIES } from "@/constants";
 import { Calendar, ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
-import { getSession } from "@/lib/session";
+import { getSession, isAdmin, SessionUser } from "@/lib/session";
 
 function LotusMark() {
   return (
@@ -48,7 +48,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<{ role: string; name: string } | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const { theme, toggle } = useTheme();
   const pathname = usePathname();
 
@@ -75,7 +75,7 @@ export default function Navbar() {
     setServicesOpen(false);
   }, [pathname]);
 
-  const dashboardUrl = user?.role === "ADMIN" || user?.role === "admin" ? ROUTES.ADMIN : ROUTES.DASHBOARD;
+  const dashboardUrl = isAdmin(user) ? ROUTES.ADMIN : ROUTES.DASHBOARD;
   const links = [
     { label: "Home", href: ROUTES.HOME },
     { label: "Services", href: ROUTES.SERVICES, dropdown: true },

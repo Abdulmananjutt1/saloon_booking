@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ROUTES, APP_NAME } from "@/constants";
 import {
   LayoutDashboard, CalendarDays,
-  Users, UserCheck, BarChart3, LogOut, Settings, MessageSquare, Bell, ChevronUp, Wallet, Scissors, Menu, X
+  Users, UserCheck, BarChart3, LogOut, Settings, MessageSquare, Bell, ChevronUp, Wallet, Scissors, Menu, X, Shield
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { useAdminNavBadges } from "@/hooks/useAdminNavBadges";
@@ -20,6 +20,7 @@ const NAV = [
   { label: "Services",      href: ROUTES.ADMIN_SERVICES,  icon: Scissors },
   { label: "Stylists",      href: ROUTES.ADMIN_STYLISTS,  icon: Users },
   { label: "Clients",       href: ROUTES.ADMIN_CLIENTS,   icon: UserCheck },
+  { label: "Users & Roles", href: "/admin/users",         icon: Shield },
   { label: "Analytics",     href: ROUTES.ADMIN_ANALYTICS, icon: BarChart3 },
   { label: "Payroll",       href: ROUTES.ADMIN_PAYROLL,   icon: Wallet },
   { label: "Chat",          href: "/admin/chat",          icon: MessageSquare, badgeKey: "chat" },
@@ -76,18 +77,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         position: "sticky", top: 0, height: "100vh", overflow: "hidden"
       }}>
         {/* Logo */}
-        <div style={{ padding: "24px 20px", borderBottom: "1px solid var(--border-light)" }}>
+        <div style={{ padding: "16px 20px 14px", borderBottom: "1px solid var(--border-light)" }}>
           <Link href={ROUTES.HOME} style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <Logo size={54} />
+            <Logo size={42} />
             <div>
-              <p style={{ fontSize: "0.88rem", fontWeight: 800, color: "var(--text-primary)", lineHeight: 1 }}>{APP_NAME}</p>
-              <p style={{ fontSize: "0.58rem", textTransform: "uppercase", letterSpacing: "0.25em", color: "var(--text-muted)", marginTop: 2 }}>Admin Panel</p>
+              <p style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-primary)", lineHeight: 1 }}>{APP_NAME}</p>
+              <p style={{ fontSize: "0.56rem", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--text-muted)", marginTop: 3 }}>Admin Panel</p>
             </div>
           </Link>
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: "16px 12px", overflow: "hidden", display: "flex", flexDirection: "column", gap: 2 }}>
+        <nav style={{ 
+          flex: 1, 
+          padding: "16px 12px", 
+          overflowY: "auto", 
+          overflowX: "hidden",
+          display: "flex", 
+          flexDirection: "column", 
+          gap: 2,
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(201,151,59,0.3) transparent"
+        }}>
           {NAV.map(({ label, href, icon: Icon, badgeKey }) => {
             const on    = active(href);
             const badge = badgeKey ? getBadge(href) : 0;
@@ -236,6 +247,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           from { opacity: 0; transform: translateY(4px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* Custom Scrollbar for Sidebar */
+        .admin-sidebar nav::-webkit-scrollbar {
+          width: 6px;
+        }
+        .admin-sidebar nav::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .admin-sidebar nav::-webkit-scrollbar-thumb {
+          background: rgba(201,151,59,0.3);
+          border-radius: 10px;
+        }
+        .admin-sidebar nav::-webkit-scrollbar-thumb:hover {
+          background: rgba(201,151,59,0.5);
+        }
+        
         .admin-mobile-header,
         .admin-mobile-overlay {
           display: none;

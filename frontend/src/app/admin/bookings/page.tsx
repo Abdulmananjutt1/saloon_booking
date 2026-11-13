@@ -50,18 +50,18 @@ export default function AdminBookingsPage() {
           const active = activeStatus === status;
           return (
             <button key={status} onClick={() => setActive(status)} style={{
-              display: "flex", alignItems: "center", gap: 7,
-              padding: "8px 16px", borderRadius: 10, cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 8, cursor: "pointer",
               background: active ? (isAll ? "var(--grad-gold-btn)" : (meta?.bg ?? "var(--bg-card)")) : "var(--bg-card)",
               border: active ? (isAll ? "none" : `1px solid ${meta?.border ?? "var(--border-light)"}`) : "1px solid var(--border-light)",
               boxShadow: active && isAll ? "0 4px 16px rgba(201,151,59,0.25)" : "none",
               transition: "all 0.2s"
             }}>
-              {!isAll && meta && <span style={{ width: 7, height: 7, borderRadius: "50%", background: meta.dot, flexShrink: 0 }} />}
-              <span style={{ fontSize: "0.75rem", fontWeight: 700, color: active ? (isAll ? "#0d0c0a" : (meta?.color ?? "var(--text-muted)")) : "var(--text-muted)", textTransform: "capitalize" }}>
+              {!isAll && meta && <span style={{ width: 6, height: 6, borderRadius: "50%", background: meta.dot, flexShrink: 0 }} />}
+              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: active ? (isAll ? "#0d0c0a" : (meta?.color ?? "var(--text-muted)")) : "var(--text-muted)", textTransform: "capitalize" }}>
                 {status}
               </span>
-              <span style={{ fontSize: "0.68rem", fontWeight: 800, padding: "1px 7px", borderRadius: 99, background: active && isAll ? "rgba(13,12,10,0.15)" : "rgba(255,255,255,0.06)", color: active ? (isAll ? "#0d0c0a" : (meta?.color ?? "var(--text-muted)")) : "var(--text-muted)" }}>
+              <span style={{ fontSize: "0.66rem", fontWeight: 800, padding: "1px 6px", borderRadius: 99, background: active && isAll ? "rgba(13,12,10,0.15)" : "rgba(255,255,255,0.06)", color: active ? (isAll ? "#0d0c0a" : (meta?.color ?? "var(--text-muted)")) : "var(--text-muted)" }}>
                 {count}
               </span>
             </button>
@@ -78,7 +78,11 @@ export default function AdminBookingsPage() {
             No {activeStatus !== "all" ? activeStatus : ""} bookings yet.
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
+          <div style={{ 
+            overflowX: "auto",
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(201,151,59,0.3) transparent"
+          }} className="table-scroll-container">
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--border-light)" }}>
@@ -172,6 +176,23 @@ export default function AdminBookingsPage() {
           </div>
         )}
       </div>
+
+      <style>{`
+        /* Thin Scrollbar for Table */
+        .table-scroll-container::-webkit-scrollbar {
+          height: 6px;
+        }
+        .table-scroll-container::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .table-scroll-container::-webkit-scrollbar-thumb {
+          background: rgba(201,151,59,0.3);
+          border-radius: 10px;
+        }
+        .table-scroll-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(201,151,59,0.5);
+        }
+      `}</style>
     </div>
   );
 }

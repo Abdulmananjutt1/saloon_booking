@@ -10,6 +10,20 @@ import { WebSocketServer, WebSocket } from "ws";
 import prisma from "./src/server/db";
 import { notifyAdmins, notifyClient } from "./src/server/lib/push";
 
+// ──────────────────────────────────────────────────────────
+//  Helper function for admin role checking
+// ──────────────────────────────────────────────────────────
+function isAdminRole(role: string | undefined | null): boolean {
+  if (!role) return false;
+  const roleUpper = role.toUpperCase();
+  return roleUpper === "SUPER_ADMIN" || 
+         roleUpper === "ADMIN" || 
+         roleUpper === "DESK_ADMIN" || 
+         roleUpper === "OPERATIONAL_ADMIN" || 
+         roleUpper === "STYLIST_MANAGER" ||
+         role === "admin"; // backward compatibility
+}
+
 const dev  = process.env.NODE_ENV !== "production";
 const port = Number(process.env.PORT ?? 3000);
 const app  = next({ dev });
@@ -48,7 +62,7 @@ app.prepare().then(() => {
 
     console.log(`[WS] Connected — role=${role} roomId=${roomId}`);
 
-    if (role === "admin") {
+    if (isAdminRole(role)) {
       adminSockets.add(ws);
     } else {
       if (!rooms.has(roomId)) rooms.set(roomId, new Set());
@@ -105,7 +119,8 @@ app.prepare().then(() => {
 
     ws.on("close", () => {
       console.log(`[WS] Disconnected — role=${role} roomId=${roomId}`);
-      if (role === "admin") {
+
+      if (isAdminRole(role)) {
         adminSockets.delete(ws);
       } else {
         rooms.get(roomId)?.delete(ws);

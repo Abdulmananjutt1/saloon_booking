@@ -24,6 +24,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if user is active
+    if (!user.isActive) {
+      return Response.json(
+        { success: false, errors: { general: "Your account has been deactivated. Please contact support." } },
+        { status: 403 }
+      );
+    }
+
     if (user.role === "CLIENT" && !user.emailVerified) {
       return Response.json(
         {

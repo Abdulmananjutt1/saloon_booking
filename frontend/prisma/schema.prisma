@@ -16,12 +16,15 @@ model User {
   role          UserRole  @default(CLIENT)
   emailVerified Boolean   @default(false)
   emailVerifiedAt DateTime?
+  isActive      Boolean   @default(true)
+  createdBy     String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   bookings      Booking[]
   reviews       Review[]
   resetTokens   PasswordResetToken[]
   verificationTokens EmailVerificationToken[]
+  permissions   UserPermission[]
 
   @@map("users")
 }
@@ -49,6 +52,43 @@ model EmailVerificationToken {
 
   @@index([userId])
   @@map("email_verification_tokens")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String
+  category    String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  userPermissions UserPermission[]
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserPermission {
+  id           String   @id @default(cuid())
+  userId       String
+  permissionId String
+  grantedAt    DateTime @default(now())
+  grantedBy    String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+  @@map("user_permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  role         UserRole
+  permissionId String
+  createdAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([role, permissionId])
+  @@map("role_permissions")
 }
 
 model Service {
@@ -274,7 +314,11 @@ model PayrollInvoiceItem {
 }
 
 enum UserRole {
+  SUPER_ADMIN
   ADMIN
+  DESK_ADMIN
+  OPERATIONAL_ADMIN
+  STYLIST_MANAGER
   CLIENT
 }
 
