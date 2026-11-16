@@ -5,7 +5,7 @@ export default function LuxuryBrandsSection() {
   const brands = [...LUXURY_BRANDS, ...LUXURY_BRANDS];
 
   return (
-    <section style={{ background: "var(--bg-secondary)", padding: "80px 0", overflow: "hidden" }}>
+    <section style={{ background: "#fbf6f0", padding: "80px 0", overflow: "hidden" }}>
       <div className="sal-container">
         <SectionHeader
           eyebrow="Luxury Brands We Use"

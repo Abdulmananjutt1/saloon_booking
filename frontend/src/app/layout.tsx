@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Cormorant_Garamond, Great_Vibes, Playfair_Display, Raleway } from "next/font/google";
 import FloatingWhatsApp from "@/components/layout/FloatingWhatsApp";
 import ThemeProvider from "@/components/layout/ThemeProvider";
@@ -30,6 +31,14 @@ const greatVibes = Great_Vibes({
   weight: "400",
 });
 
+const themeScript = `(function() {
+  try {
+    var saved = localStorage.getItem('gs-theme') || localStorage.getItem('theme');
+    var theme = (saved === 'dark' || saved === 'light') ? saved : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch (e) {}
+})();`;
+
 export const metadata: Metadata = {
   title: "Glamour Studio — Premium Salon & Spa",
   description:
@@ -42,7 +51,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="light" className={`${cormorant.variable} ${raleway.variable} ${playfair.variable} ${greatVibes.variable} h-full overflow-x-hidden`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${cormorant.variable} ${raleway.variable} ${playfair.variable} ${greatVibes.variable} h-full overflow-x-hidden`}
+      suppressHydrationWarning
+    >
+      <head>
+        <Script id="theme-script" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
+      </head>
       <body className="min-h-full flex flex-col antialiased overflow-x-hidden w-full max-w-full" style={{ background: "var(--bg-primary)", color: "var(--text-primary)" }}>
         <ThemeProvider>
           {children}

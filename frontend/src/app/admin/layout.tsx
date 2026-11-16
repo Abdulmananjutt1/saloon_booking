@@ -13,6 +13,7 @@ import { useAdminNavBadges } from "@/hooks/useAdminNavBadges";
 import { RedBadge } from "@/components/ui/RedBadge";
 import { ToastContainer, useToast } from "@/components/ui/Toast";
 import { clearSession, pushSessionToast, popSessionToast } from "@/lib/session";
+import { useTheme } from "@/components/layout/ThemeProvider";
 
 const NAV = [
   { label: "Dashboard",     href: ROUTES.ADMIN,           icon: LayoutDashboard },
@@ -33,6 +34,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { getBadge } = useAdminNavBadges();
+  const { theme, toggle: toggleTheme } = useTheme();
   const { toasts, toast, remove } = useToast();
 
   // Show toast from sessionStorage (e.g. after login)
@@ -143,14 +145,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               }}>
                 <button 
                   onClick={() => {
-                    const isDark = document.documentElement.getAttribute("data-theme") !== "light";
-                    if (isDark) {
-                      document.documentElement.setAttribute("data-theme", "light");
-                      localStorage.setItem("theme", "light");
-                    } else {
-                      document.documentElement.removeAttribute("data-theme");
-                      localStorage.setItem("theme", "dark");
-                    }
+                    toggleTheme();
                     setShowProfileMenu(false);
                   }}
                   style={{
@@ -162,7 +157,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
                   onMouseOut={(e) => e.currentTarget.style.background = "transparent"}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> Toggle Theme
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </button>
                 <Link href="/admin/settings" onClick={() => setShowProfileMenu(false)} style={{
                   display: "flex", alignItems: "center", gap: 10,

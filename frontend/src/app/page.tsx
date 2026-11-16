@@ -1,24 +1,19 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
-import CtaBanner from "@/components/CtaBanner";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import {
   HomeHero,
   GoldTicker,
-  ExperienceVideoSection,
   AboutSection,
   ServicesPreviewSection,
   LuxuryBrandsSection,
-  PricingSection,
   GalleryPreviewSection,
-  TeamSection,
 } from "@/components/home";
-import { SERVICES, STYLISTS, REVIEWS } from "@/lib/data/salon";
+import { SERVICES, REVIEWS } from "@/lib/data/salon";
 
 export default function HomePage() {
   const popularServices = SERVICES.filter((s) => s.popular).slice(0, 6);
-  const featuredStylists = STYLISTS.slice(0, 4);
 
   return (
     <>
@@ -30,16 +25,10 @@ export default function HomePage() {
         <AboutSection />
         <ServicesPreviewSection services={popularServices} />
         <LuxuryBrandsSection />
-        <PricingSection />
         <GalleryPreviewSection />
-        <div id="story">
-          <ExperienceVideoSection />
-        </div>
-        <TeamSection stylists={featuredStylists} />
         <div id="reviews">
           <TestimonialsSection reviews={REVIEWS} animated />
         </div>
-        <CtaBanner />
       </main>
       <Footer />
     </>

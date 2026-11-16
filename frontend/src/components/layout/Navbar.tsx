@@ -146,7 +146,11 @@ export default function Navbar() {
               <Link href={dashboardUrl} className="lux-nav-ghost">
                 Dashboard
               </Link>
-            ) : null}
+            ) : (
+              <Link href={ROUTES.LOGIN} className="lux-nav-ghost">
+                Sign In
+              </Link>
+            )}
             <Link href={ROUTES.BOOK} className="lux-btn-dark lux-nav-book">
               <Calendar style={{ width: 15, height: 15 }} />
               Book Appointment

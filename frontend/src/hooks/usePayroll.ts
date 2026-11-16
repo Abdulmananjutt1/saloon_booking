@@ -16,14 +16,14 @@ export interface PayRate {
 }
 
 export interface StylistPayrollSummary {
-  id:               string;
-  name:             string;
-  role:             string;
-  avatar:           string;
-  completedBookings:number;
-  totalRevenue:     number;
-  earnedAmount:     number;
-  payRate:          PayRate | null;
+  id:                string;
+  name:              string;
+  role:              string;
+  avatar:            string;
+  completedBookings: number;
+  totalRevenue:      number;
+  earnedAmount:      number;
+  payRate:           PayRate | null;
 }
 
 export interface InvoiceItem {
@@ -48,42 +48,70 @@ export interface Invoice {
   items:       InvoiceItem[];
 }
 
+// Manual adjustment added by admin (bonus / deduction)
+export interface ManualAdjustment {
+  id:          string;
+  stylistId:   string;
+  type:        "bonus" | "deduction";
+  amount:      number;
+  reason:      string;
+  date:        string;
+}
+
 interface ApiResponse<T> { success: boolean; data: T; error?: string; errors?: Record<string, string> }
 
 export function usePayroll() {
-  const [stylists,        setStylists]        = useState<StylistPayrollSummary[]>([]);
-  const [invoices,        setInvoices]        = useState<Invoice[]>([]);
-  const [loading,         setLoading]         = useState(true);
-  const [activeTab,       setActiveTab]       = useState<"overview" | "invoices">("overview");
-  const [filterStylist,   setFilterStylist]   = useState("all");
-  const [filterStatus,    setFilterStatus]    = useState("all");
+  const [stylists,      setStylists]      = useState<StylistPayrollSummary[]>([]);
+  const [invoices,      setInvoices]      = useState<Invoice[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [activeTab,     setActiveTab]     = useState<"overview" | "invoices">("overview");
+  const [filterStylist, setFilterStylist] = useState("all");
+  const [filterStatus,  setFilterStatus]  = useState("all");
 
-  // Generate invoice modal state
-  const [genModal,        setGenModal]        = useState(false);
-  const [genForm,         setGenForm]         = useState({
-    stylistId: "", periodStart: "", periodEnd: "", notes: "",
+  // ── Generate invoice modal ────────────────────────────────────────────────
+  const [genModal,    setGenModal]    = useState(false);
+  const [genForm,     setGenForm]     = useState({ stylistId: "", periodStart: "", periodEnd: "", notes: "" });
+  const [genErrors,   setGenErrors]   = useState<Record<string, string>>({});
+  const [generating,  setGenerating]  = useState(false);
+
+  // ── Configure pay-rate modal ──────────────────────────────────────────────
+  const [rateModal,   setRateModal]   = useState(false);
+  const [rateStylist, setRateStylist] = useState<StylistPayrollSummary | null>(null);
+  const [rateForm,    setRateForm]    = useState({
+    rateType:      "COMMISSION" as "FLAT" | "COMMISSION",
+    flatAmount:    "",
+    commissionPct: "",
+    baseSalary:    "",
+    // bonus tiers — stored as "minBookings:bonusAmount" pairs, comma-separated
+    tiers:         "",
   });
-  const [genErrors,       setGenErrors]       = useState<Record<string, string>>({});
-  const [generating,      setGenerating]      = useState(false);
+  const [rateErrors,  setRateErrors]  = useState<Record<string, string>>({});
+  const [rateSaving,  setRateSaving]  = useState(false);
 
-  // Pay rate modal
-  const [rateModal,       setRateModal]       = useState(false);
-  const [rateStylist,     setRateStylist]     = useState<StylistPayrollSummary | null>(null);
-  const [rateForm,        setRateForm]        = useState({ rateType: "COMMISSION" as "FLAT" | "COMMISSION", flatAmount: "", commissionPct: "", baseSalary: "" });
-  const [rateErrors,      setRateErrors]      = useState<Record<string, string>>({});
-  const [rateSaving,      setRateSaving]      = useState(false);
+  // ── Manual adjustment modal ───────────────────────────────────────────────
+  const [adjModal,    setAdjModal]    = useState(false);
+  const [adjStylist,  setAdjStylist]  = useState<StylistPayrollSummary | null>(null);
+  const [adjForm,     setAdjForm]     = useState({ type: "bonus" as "bonus" | "deduction", amount: "", reason: "" });
+  const [adjErrors,   setAdjErrors]   = useState<Record<string, string>>({});
+  // All adjustments live here (per session; could be persisted to localStorage if needed)
+  const [adjustments, setAdjustments] = useState<ManualAdjustment[]>([]);
 
-  // Invoice detail modal
-  const [detailInvoice,   setDetailInvoice]   = useState<Invoice | null>(null);
-  const [updatingId,      setUpdatingId]      = useState<string | null>(null);
+  // ── Invoice detail / edit modal ───────────────────────────────────────────
+  const [detailInvoice, setDetailInvoice] = useState<Invoice | null>(null);
+  const [editInvoice,   setEditInvoice]   = useState<Invoice | null>(null);
+  const [editForm,      setEditForm]      = useState({ periodStart: "", periodEnd: "", notes: "", status: "" });
+  const [editErrors,    setEditErrors]    = useState<Record<string, string>>({});
+  const [editSaving,    setEditSaving]    = useState(false);
+  const [updatingId,    setUpdatingId]    = useState<string | null>(null);
 
+  // ── Fetch ─────────────────────────────────────────────────────────────────
   const fetchAll = useCallback(async () => {
     setLoading(true);
     const token = getToken();
     try {
       const [styRes, invRes] = await Promise.all([
-        payrollApi.getStylists(token ?? "") as Promise<ApiResponse<StylistPayrollSummary[]>>,
-        payrollApi.getInvoices(undefined, undefined, token ?? "") as Promise<ApiResponse<Invoice[]>>,
+        payrollApi.getStylists(token ?? "")                              as Promise<ApiResponse<StylistPayrollSummary[]>>,
+        payrollApi.getInvoices(undefined, undefined, token ?? "")        as Promise<ApiResponse<Invoice[]>>,
       ]);
       if (styRes.success) setStylists(styRes.data);
       if (invRes.success) setInvoices(invRes.data);
@@ -94,14 +122,13 @@ export function usePayroll() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Filtered invoices
   const filteredInvoices = invoices.filter((inv) => {
     if (filterStylist !== "all" && inv.stylistId !== filterStylist) return false;
     if (filterStatus  !== "all" && inv.status    !== filterStatus)  return false;
     return true;
   });
 
-  // Generate invoice
+  // ── Generate invoice ──────────────────────────────────────────────────────
   const openGenModal = (stylistId = "") => {
     setGenForm({ stylistId, periodStart: "", periodEnd: "", notes: "" });
     setGenErrors({});
@@ -128,11 +155,10 @@ export function usePayroll() {
         setGenModal(false);
         setActiveTab("invoices");
         return { ok: true };
-      } else {
-        if (res.errors) setGenErrors(res.errors);
-        else setGenErrors({ general: res.error ?? "Failed to generate invoice" });
-        return { ok: false, error: res.error ?? "Failed to generate invoice" };
       }
+      if (res.errors) setGenErrors(res.errors);
+      else setGenErrors({ general: res.error ?? "Failed to generate invoice" });
+      return { ok: false, error: res.error ?? "Failed to generate invoice" };
     } catch (err: any) {
       return { ok: false, error: err.message ?? "Network error" };
     } finally {
@@ -140,15 +166,16 @@ export function usePayroll() {
     }
   };
 
-  // Pay rate
+  // ── Pay rate ──────────────────────────────────────────────────────────────
   const openRateModal = (stylist: StylistPayrollSummary) => {
     setRateStylist(stylist);
     setRateErrors({});
     setRateForm({
-      rateType:      stylist.payRate?.rateType ?? "COMMISSION",
-      flatAmount:    stylist.payRate?.flatAmount?.toString() ?? "",
+      rateType:      stylist.payRate?.rateType      ?? "COMMISSION",
+      flatAmount:    stylist.payRate?.flatAmount?.toString()    ?? "",
       commissionPct: stylist.payRate?.commissionPct?.toString() ?? "",
-      baseSalary:    stylist.payRate?.baseSalary?.toString() ?? "",
+      baseSalary:    stylist.payRate?.baseSalary?.toString()    ?? "",
+      tiers:         "",
     });
     setRateModal(true);
   };
@@ -158,7 +185,6 @@ export function usePayroll() {
     const token = getToken();
     if (!token) return { ok: false, error: "No session token found" };
 
-    // Frontend validation
     const errs: Record<string, string> = {};
     if (rateForm.rateType === "COMMISSION") {
       const pct = parseFloat(rateForm.commissionPct);
@@ -187,9 +213,7 @@ export function usePayroll() {
       };
       const res = await payrollApi.setPayRate(rateStylist.id, body, token) as ApiResponse<PayRate>;
       if (res.success) {
-        setStylists((prev) => prev.map((s) =>
-          s.id === rateStylist.id ? { ...s, payRate: res.data } : s
-        ));
+        setStylists((prev) => prev.map((s) => s.id === rateStylist.id ? { ...s, payRate: res.data } : s));
         setRateModal(false);
         return { ok: true };
       }
@@ -202,7 +226,83 @@ export function usePayroll() {
     }
   };
 
-  // Update invoice status
+  // ── Manual adjustments ────────────────────────────────────────────────────
+  const openAdjModal = (stylist: StylistPayrollSummary) => {
+    setAdjStylist(stylist);
+    setAdjForm({ type: "bonus", amount: "", reason: "" });
+    setAdjErrors({});
+    setAdjModal(true);
+  };
+
+  const saveAdjustment = (): { ok: boolean; error?: string } => {
+    if (!adjStylist) return { ok: false, error: "No stylist selected" };
+    const errs: Record<string, string> = {};
+    const amt = parseFloat(adjForm.amount);
+    if (!adjForm.amount || isNaN(amt) || amt <= 0) errs.amount = "Enter a valid positive amount";
+    if (!adjForm.reason.trim()) errs.reason = "Reason is required";
+    setAdjErrors(errs);
+    if (Object.keys(errs).length) return { ok: false, error: "Validation failed" };
+
+    const adj: ManualAdjustment = {
+      id:        `adj_${Date.now()}`,
+      stylistId: adjStylist.id,
+      type:      adjForm.type,
+      amount:    amt,
+      reason:    adjForm.reason.trim(),
+      date:      new Date().toISOString().split("T")[0],
+    };
+    setAdjustments((prev) => [adj, ...prev]);
+    setAdjModal(false);
+    return { ok: true };
+  };
+
+  const removeAdjustment = (id: string) => setAdjustments((prev) => prev.filter((a) => a.id !== id));
+
+  // ── Edit invoice ──────────────────────────────────────────────────────────
+  const openEditInvoice = (inv: Invoice) => {
+    setEditInvoice(inv);
+    setEditForm({
+      periodStart: inv.periodStart,
+      periodEnd:   inv.periodEnd,
+      notes:       inv.notes ?? "",
+      status:      inv.status,
+    });
+    setEditErrors({});
+  };
+
+  const saveEditInvoice = async (): Promise<{ ok: boolean; error?: string }> => {
+    if (!editInvoice) return { ok: false, error: "No invoice selected" };
+    const token = getToken();
+    if (!token) return { ok: false, error: "No session token found" };
+
+    const errs: Record<string, string> = {};
+    if (!editForm.periodStart) errs.periodStart = "Required";
+    if (!editForm.periodEnd)   errs.periodEnd   = "Required";
+    if (editForm.periodStart && editForm.periodEnd && editForm.periodStart > editForm.periodEnd)
+      errs.periodEnd = "End must be after start";
+    setEditErrors(errs);
+    if (Object.keys(errs).length) return { ok: false, error: "Validation failed" };
+
+    setEditSaving(true);
+    try {
+      // Update status first (existing endpoint)
+      if (editForm.status !== editInvoice.status) {
+        const statusRes = await payrollApi.updateStatus(editInvoice.id, editForm.status, token) as ApiResponse<Invoice>;
+        if (statusRes.success) {
+          setInvoices((prev) => prev.map((inv) => inv.id === editInvoice.id ? statusRes.data : inv));
+        }
+      }
+      setEditInvoice(null);
+      await fetchAll();
+      return { ok: true };
+    } catch (err: any) {
+      return { ok: false, error: err.message ?? "Network error" };
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  // ── Invoice status / delete ───────────────────────────────────────────────
   const updateInvoiceStatus = async (id: string, status: string): Promise<{ ok: boolean; error?: string }> => {
     const token = getToken();
     if (!token) return { ok: false, error: "No session token found" };
@@ -214,7 +314,7 @@ export function usePayroll() {
         if (detailInvoice?.id === id) setDetailInvoice(res.data);
         return { ok: true };
       }
-      return { ok: false, error: res.error ?? "Failed to update invoice status" };
+      return { ok: false, error: res.error ?? "Failed to update status" };
     } catch (err: any) {
       return { ok: false, error: err.message ?? "Network error" };
     } finally {
@@ -222,7 +322,6 @@ export function usePayroll() {
     }
   };
 
-  // Delete invoice
   const deleteInvoice = async (id: string): Promise<{ ok: boolean; error?: string }> => {
     const token = getToken();
     if (!token) return { ok: false, error: "No session token found" };
@@ -231,6 +330,7 @@ export function usePayroll() {
       if (res.success) {
         setInvoices((prev) => prev.filter((inv) => inv.id !== id));
         if (detailInvoice?.id === id) setDetailInvoice(null);
+        if (editInvoice?.id  === id) setEditInvoice(null);
         return { ok: true };
       }
       return { ok: false, error: res.error ?? "Failed to delete invoice" };
@@ -239,7 +339,7 @@ export function usePayroll() {
     }
   };
 
-  // Totals
+  // ── Totals ────────────────────────────────────────────────────────────────
   const totalPaid    = invoices.filter((i) => i.status === "paid").reduce((s, i) => s + i.totalAmount, 0);
   const totalPending = invoices.filter((i) => i.status === "pending").reduce((s, i) => s + i.totalAmount, 0);
   const totalOverdue = invoices.filter((i) => i.status === "overdue").reduce((s, i) => s + i.totalAmount, 0);
@@ -250,13 +350,19 @@ export function usePayroll() {
     filterStylist, setFilterStylist,
     filterStatus,  setFilterStatus,
     totalPaid, totalPending, totalOverdue,
-    // generate modal
+    // generate
     genModal, openGenModal, closeGenModal: () => setGenModal(false),
     genForm, setGenForm, genErrors, generating, generateInvoice,
-    // rate modal
+    // pay rate
     rateModal, openRateModal, closeRateModal: () => setRateModal(false),
     rateStylist, rateForm, setRateForm, rateErrors, setRateErrors, rateSaving, savePayRate,
-    // detail
+    // adjustments
+    adjustments, adjModal, openAdjModal, closeAdjModal: () => setAdjModal(false),
+    adjStylist, adjForm, setAdjForm, adjErrors, saveAdjustment, removeAdjustment,
+    // edit invoice
+    editInvoice, openEditInvoice, closeEditInvoice: () => setEditInvoice(null),
+    editForm, setEditForm, editErrors, editSaving, saveEditInvoice,
+    // detail / status / delete
     detailInvoice, setDetailInvoice,
     updatingId, updateInvoiceStatus, deleteInvoice,
     refresh: fetchAll,

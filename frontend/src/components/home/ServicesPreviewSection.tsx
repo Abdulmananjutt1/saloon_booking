@@ -1,41 +1,13 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-import SectionHeader from "@/components/sections/SectionHeader";
-import ServiceCard from "@/components/services/ServiceCard";
+import { ArrowRight, Brush, Check, Diamond, Droplets, Heart, Leaf, Scissors, Sparkles, Star } from "lucide-react";
 import { ROUTES } from "@/constants";
 import type { Service } from "@/types";
 
-interface ServicesPreviewSectionProps {
-  services: Service[];
-}
+interface ServicesPreviewSectionProps { services: Service[]; }
+const categories = [{ label: "All Services", icon: Sparkles }, { label: "Hair Care", icon: Scissors }, { label: "Skincare", icon: Leaf }, { label: "Nails", icon: Droplets }, { label: "Makeup", icon: Brush }, { label: "Others", icon: Star }];
+const serviceMeta = [["Hair Coloring", "Get the perfect shade for a fresh new look.", Scissors], ["Facial Treatment", "Refresh and rejuvenate your skin naturally.", Leaf], ["Nail Art & Manicure", "Add a touch of elegance to your hands.", Droplets], ["Bridal Makeup", "Look stunning on your special day.", Brush], ["Hair Treatment", "Healthy, shiny and stronger hair.", Scissors], ["Skin Care", "Glow naturally with our expert care.", Leaf]] as const;
 
 export default function ServicesPreviewSection({ services }: ServicesPreviewSectionProps) {
-  return (
-    <section style={{ background: "var(--bg-primary)", padding: "100px 0" }}>
-      <div className="sal-container">
-        <SectionHeader
-          eyebrow="Our Services"
-          title={
-            <>
-              Explore Our <span className="text-gold">Services</span>
-            </>
-          }
-          description="From classic cuts to luxury bridal packages — everything to make you look and feel your absolute best."
-        />
-
-        <div className="reveal-stagger sal-grid" style={{ gap: 24 }}>
-          {services.map((service) => (
-            <ServiceCard key={service.id} service={service} />
-          ))}
-        </div>
-
-        <div className="reveal" style={{ textAlign: "center", marginTop: 44 }}>
-          <Link href={ROUTES.SERVICES} className="sal-btn sal-btn-outline">
-            View All Services
-            <ChevronRight style={{ width: 16, height: 16 }} />
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
+  return <section className="beauty-services" id="services"><div className="beauty-services-inner"><div className="beauty-services-heading"><div className="beauty-services-kicker"><span /><Sparkles size={17} /> Our Services <span /></div><h2>Premium Beauty Services<br /><em>for Your Unique Self</em></h2><p>From classic elegance to modern trends, enjoy a wide range of professional beauty services at our salon.</p></div><div className="beauty-services-layout"><div className="beauty-services-main"><div className="beauty-services-tabs">{categories.map(({ label, icon: Icon }, i) => <button key={label} className={i === 0 ? "is-active" : ""} type="button"><Icon size={18} /> {label}</button>)}</div><div className="beauty-service-grid">{services.slice(0, 6).map((service, i) => { const [name, description, Icon] = serviceMeta[i] ?? serviceMeta[0]; return <Link href={`${ROUTES.SERVICES}/${service.id}`} className="beauty-service-card" key={service.id}><img src={service.image} alt={service.name} /><div className="beauty-service-copy"><span className="beauty-service-icon"><Icon size={17} /></span><h3>{name}</h3><p>{description}</p><span className="beauty-service-link">Book Now <ArrowRight size={15} /></span></div></Link>; })}</div></div><div className="beauty-services-feature"><div className="beauty-feature-ring"><img src="/assets/hero-woman.jpg" alt="Relaxing spa treatment" /></div><div className="beauty-feature-bubble">Feel<br /><strong>Beautiful</strong><br />Inside &amp; Out<br /><Heart size={20} /></div></div></div><div className="beauty-trust-strip"><div><Diamond /><span><b>Expert Stylists</b><small>Professional &amp; Skilled</small></span></div><i /><div><Check /><span><b>Premium Products</b><small>Safe &amp; Trusted</small></span></div><i /><div><Heart /><span><b>Relaxing Atmosphere</b><small>Your Comfort First</small></span></div><Link href={ROUTES.BOOK} className="beauty-book-btn">Book Appointment <ArrowRight size={17} /></Link></div></div></section>;
 }
+
